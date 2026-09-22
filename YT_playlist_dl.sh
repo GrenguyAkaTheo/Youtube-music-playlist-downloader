@@ -124,7 +124,6 @@ if [ -d "$MUSIC_DIR" ]; then
     -x --audio-format mp3 --audio-quality 0 \
     --embed-thumbnail --ppa "EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf crop='ih:ih'" \
     --embed-metadata \
-    --sub-langs "en.*,ja.*,.*-orig,all" \
     --convert-subs lrc --postprocessor-args "ffmpeg:-id3v2_version 3" \
     --parse-metadata "track_number:%(meta_track)s" \
     --no-part --no-warnings -i --ignore-errors --no-cache-dir \
