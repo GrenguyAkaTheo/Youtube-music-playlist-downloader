@@ -11,6 +11,8 @@ For this script to work you must have yt-dlp, ffmpeg, and mid3v2 installed. When
 
 You MUST edit the .sh file (The actual script) and follow the short and simple instructions from line 4 to line 8 or it will crap the bed when you try to run it.
 
+This script should also be stored in a folder called `Geniusnt` within your music folder. This is because I keep it in that folder with my CLI media player (also on my GitHub) and I reeaaalllyyy can't be bothered to make the changes needed for this to by dynamic, and all of the files used for this script are made and stored in this folder.
+
 You do also need to export your browser cookies for this to work (because Google are rude, and want to make sure your a person before letting you have the audio stream). To do so, you can get them by installing a browser extention that extracts the cookies for the page your on, opening a private/incognito tab (so that your using a different cookie jar that wont renew when opening yt on a normal tab), going onto YouTube music, and then export the cookies via the browser extention you used. Once you've done that, rename the exported text file to "cookies.txt" and place it in the same folder as the YT_playlist_dl.sh file. Oh yeah, I also think these cookies can expire after a few months, so you might have to do this again if the script gives errors like "could not receive requested format".
 
 Make sure the file is exicutable on your linux distro with `sudo chmod -x <path to file>/YT_playlist_dl.sh` in the terminal, or whatever command you use to make .sh files exicutable.
