@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+# Make a folder called "Geniusnt" in your music directory, and place this script in that folder please
+
 # Please read the whole README file before running, there's important information in there
 # Set music directory, YT playlist link, and a playlist name for all your songs here
-MUSIC_DIR="<Path to your music folder>"
 PLAYLIST_URL="<Your YouTube playlist's link (make sure the playlist is set to public)>"
 PLAYLIST_FILE="<What you want your playlist to be called on your device>.m3u"
 # You'r all set to use the script now :D
+MUSIC_DIR=".."
 
 #makes the script run in the folder it's saved in rather than your terminals active directory
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
@@ -38,7 +40,6 @@ done
 echo "dependency check successful!"
 
 ## If you run this script and it closes its self imediatly, restarting your device should sort that. It doesn't happen much, but on my raspberry pi 3B+ I had that issue a couple of times and restating it worked both times
-
 
 # --- Makes the script run in a terminal if you don't launch it via the terminal ---
 if [ ! -t 0 ]; then
