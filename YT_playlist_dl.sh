@@ -48,16 +48,6 @@ fi
 # -----------------------------------------------------------------------------------
 
 
-# Prevent multiple instances of the script running at once
-LOCKFILE="${TMPDIR:-/data/local/tmp}/music_sync.lock"
-if [ -e "$LOCKFILE" ]; then
-    echo "Sync already in progress. Exiting."
-    exit 1
-fi
-touch "$LOCKFILE"
-trap "rm -f '$LOCKFILE' *.tmp online_ids.txt local_history_ids.txt; exit" INT TERM EXIT
-
-
 # Force UTF-8 for special characters
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
@@ -82,15 +72,15 @@ fi
 echo ""
 
 # Check for WiFi connection by pinging Google, cos uhh, Google is basicaly always up
-CONNECTED=false
-for i in {1..6}; do
-    if ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
-        CONNECTED=true
-        break
-    fi
-    echo "Music sync: Waiting for WiFi... (Attempt $i)"
-    sleep 5
-done
+CONNECTED=true
+## for i in {1..6}; do
+##     if ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
+##        CONNECTED=true
+##        break
+##    fi
+##    echo "Music sync: Waiting for WiFi... (Attempt $i)"
+##    sleep 5
+##done
 
 echo ""
 
@@ -106,19 +96,17 @@ if [ -d "$MUSIC_DIR" ]; then
 
     # The start of the actuall point of the script lol
 
-    # Checks the amount of songs before the download so that it can say how many songs were added or removed
-    BEFORE_COUNT=$(ls -1 *.mp3 2>/dev/null | wc -l)
-
     # Generate a yt-dlp archive from id_filename_map.txt that safe to get corrupted if something goes wrong
-    if [ -f "id_filename_map.txt" ]; then
-        awk -F'|' '{print "youtube " $1}' id_filename_map.txt > id_filename_map_but_so_its_not_corrupted_during_download.tmp
+    if [ -f "Geniusnt/id_filename_map.txt" ]; then
+        awk -F'|' '{print "youtube " $1}' Geniusnt/id_filename_map.txt > Geniusnt/id_filename_map_but_so_its_not_corrupted_during_download.tmp
     else
-        touch id_filename_map_but_so_its_not_corrupted_during_download.tmp
+        touch Geniusnt/id_filename_map_but_so_its_not_corrupted_during_download.tmp
     fi
 
     # The actuall download command
     # Feel free to change the metadata related taggs so that its suited for you (If it breaks shit you can always just look at the original command on GitHub again) :D
-    yt-dlp --cookies cookies.txt \
+    yt-dlp \
+    --cookies Geniusnt/cookies.txt \
     --extractor-args "youtube:player_client=tv_downgraded,default" \
     -f "ba/b" \
     -x --audio-format mp3 --audio-quality 0 \
@@ -127,18 +115,19 @@ if [ -d "$MUSIC_DIR" ]; then
     --convert-subs lrc --postprocessor-args "ffmpeg:-id3v2_version 3" \
     --parse-metadata "track_number:%(meta_track)s" \
     --no-part --no-warnings -i --ignore-errors --no-cache-dir \
-    --download-archive id_filename_map_but_so_its_not_corrupted_during_download.tmp -o "%(title)s.%(ext)s" \
-    --print-to-file "%(id)s|%(title)s.mp3" new_songs.tmp \
+    --download-archive Geniusnt/id_filename_map_but_so_its_not_corrupted_during_download.tmp -o "%(title)s.%(ext)s" \
+    --print-to-file "%(id)s|%(title)s.mp3" Geniusnt/new_songs.tmp \
     --progress \
     "$PLAYLIST_URL"
 
-    rm -f id_filename_map_but_so_its_not_corrupted_during_download.tmp
+    rm -f Geniusnt/id_filename_map_but_so_its_not_corrupted_during_download.tmp
     REMOVED_COUNT=0
 
 
     # This checks for any new songs so that you get asked if you want to change the title of your newly downloaded songs
     # I found the YouTube song names anoying because alot of them had a bunch of random junk in the names
-    if [ -f "new_songs.tmp" ]; then
+    if [ -f "Geniusnt/new_songs.tmp" ]; then
+        ADDED = 0
         echo -e "\nMusic sync: Tagging new songs..."
         # Heres the part where we make sure it asks you for each song because I forgot to do that in some earlier versions of the script
         while IFS='|' read -r id filename <&3; do
@@ -153,9 +142,10 @@ if [ -d "$MUSIC_DIR" ]; then
                 fi
                 mid3v2 -t "$CLEAN_TITLE" "$filename"
                 echo " -> Saved title tag as: $CLEAN_TITLE"
-                echo "$id|$filename" >> id_filename_map.txt
+                echo "$id|$filename" >> Geniusnt/id_filename_map.txt
             fi
-        done 3< new_songs.tmp
+            ADDED=$(($ADDED+1))
+        done 3< Geniusnt/new_songs.tmp
     else
         echo "Music sync: No new songs downloaded, skipping tagging."
         echo ""
@@ -166,10 +156,10 @@ if [ -d "$MUSIC_DIR" ]; then
     # Deleting songs that aren't on the YouTube playlist anymore
     echo -e "\nMusic sync: Scanning for removed songs..."
 
-    if yt-dlp --get-id --flat-playlist --no-warnings "$PLAYLIST_URL" > online_ids.txt; then
+    if yt-dlp --get-id --flat-playlist --no-warnings "$PLAYLIST_URL" > Geniusnt/online_ids.txt; then
 
-        ONLINE_COUNT=$(wc -l < online_ids.txt)
-        LOCAL_COUNT=$(wc -l < id_filename_map.txt 2>/dev/null || echo 0)
+        ONLINE_COUNT=$(wc -l < Geniusnt/online_ids.txt)
+        LOCAL_COUNT=$(wc -l < Geniusnt/id_filename_map.txt 2>/dev/null || echo 0)
 
         # FAIL-SAFE: If online count drops by more than 25% compared to local, abort deletion!
         if [ "$LOCAL_COUNT" -gt 0 ]; then
@@ -182,36 +172,33 @@ if [ -d "$MUSIC_DIR" ]; then
             fi
         fi
 
-        # Make the deleted files go kapuf when they arent in id_filename_map.txt
-        if [ "${SKIP_DELETION:-false}" = false ] && [ -f "id_filename_map.txt" ]; then
-            cp id_filename_map.txt id_filename_map_read.tmp
+        # Make the deleted files go kapuf when they arent in Geniusnt/id_filename_map.txt
+        if [ "${SKIP_DELETION:-false}" = false ] && [ -f "Geniusnt/id_filename_map.txt" ]; then
+            cp Geniusnt/id_filename_map.txt Geniusnt/id_filename_map_read.tmp
             while IFS='|' read -r id filename; do
                 [ -z "$id" ] && continue
-                if ! grep -qFx -- "$id" online_ids.txt; then
+                if ! grep -qFx -- "$id" Geniusnt/online_ids.txt; then
                     if [ -f "$filename" ]; then
                         echo ""
                         echo " -> Deleting removed song: $filename"
                         rm "$filename"
-                        grep -v "^$id|" id_filename_map.txt > id_map.tmp && mv id_map.tmp id_filename_map.txt
+                        grep -v "^$id|" Geniusnt/id_filename_map.txt > id_map.tmp && mv id_map.tmp Geniusnt/id_filename_map.txt
                         echo " -> Removed ID $id and filename from map."
                         echo "$filename" >> Deleted_files.tmp
                         REMOVED_COUNT=$((REMOVED_COUNT + 1))
                     fi
                 fi
-            done < id_filename_map_read.tmp
+            done < Geniusnt/id_filename_map_read.tmp
 
-            rm -f id_filename_map_read.tmp
+            rm -f Geniusnt/id_filename_map_read.tmp
 
         elif [ "${SKIP_DELETION:-false}" = false ]; then
-            echo "Music sync: id_filename_map.txt not found, skipping file deletion."
+            echo "Music sync: Geniusnt/id_filename_map.txt not found, skipping file deletion."
         fi
 
     else
         echo "Music sync: Could not reach YouTube to verify playlist."
     fi
-
-    AFTER_COUNT=$(ls -1 *.mp3 2>/dev/null | wc -l)
-    ADDED=$((AFTER_COUNT - BEFORE_COUNT))
 
     # Playlist update if songs were added or removed
     if [[ $ADDED -gt 0 || $REMOVED_COUNT -gt 0 ]]; then
@@ -229,7 +216,7 @@ if [ -d "$MUSIC_DIR" ]; then
     fi
         echo "-----------------------------------------------------------------"
         echo "Added: $ADDED songs | Deleted: $REMOVED_COUNT songs"
-        echo "Check sync_log.txt in your music directory for more info"
+        echo "Check Geniusnt/sync_log.txt in your music directory for more info"
 else
     echo "Music sync: $MUSIC_DIR does not exist or could not be found"
 fi
@@ -243,7 +230,7 @@ LOG_FILE="$SCRIPT_DIR/sync_log.txt"
   echo "Added: $ADDED | Deleted: $REMOVED_COUNT"
   echo ""
   echo "Songs added (YouTube ID|File name);"
-  cat new_songs.tmp 2>/dev/null
+  cat Geniusnt/new_songs.tmp 2>/dev/null
   echo ""
   echo "Songs deleted (File name);"
   cat Deleted_files.tmp 2>/dev/null
@@ -252,7 +239,7 @@ LOG_FILE="$SCRIPT_DIR/sync_log.txt"
 
 
 rm Deleted_files.tmp 2>/dev/null
-rm new_songs.tmp 2>/dev/null
+rm Geniusnt/new_songs.tmp 2>/dev/null
 
 echo ""
 read -p "Music sync complete. Press [Enter] to exit..."
