@@ -110,19 +110,24 @@ if [ -d "$MUSIC_DIR" ]; then
     --cookies Geniusnt/cookies.txt \
     --extractor-args "youtube:player_client=tv_downgraded,default" \
     -f "ba/b" \
-    -x --audio-format mp3 --audio-quality 0 \
-    --embed-thumbnail --ppa "EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf crop='ih:ih'" \
+    -x --audio-format mp3 \
+    --audio-quality 0 \
+    --embed-thumbnail \
+    --ppa "EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf crop='ih:ih'" \
     --embed-metadata \
-    --convert-subs lrc --postprocessor-args "ffmpeg:-id3v2_version 3" \
+    --convert-subs lrc \
+    --postprocessor-args "ffmpeg:-id3v2_version 3" \
     --parse-metadata "track_number:%(meta_track)s" \
-    --no-part --no-warnings -i --ignore-errors --no-cache-dir \
+    --parse-metadata "::(?P<uploader>)" \
+    --parse-metadata "::(?P<creator>)" \
+    --no-part \
+    --no-warnings -i \
+    --ignore-errors \
+    --no-cache-dir \
     --download-archive Geniusnt/id_filename_map_but_so_its_not_corrupted_during_download.tmp -o "%(title)s.%(ext)s" \
     --print-to-file "%(id)s|%(title)s.mp3" Geniusnt/new_songs.tmp \
     --progress \
     "$PLAYLIST_URL"
-
-    rm -f Geniusnt/id_filename_map_but_so_its_not_corrupted_during_download.tmp
-    REMOVED_COUNT=0
 
 
     # This checks for any new songs so that you get asked if you want to change the title of your newly downloaded songs
@@ -155,7 +160,7 @@ if [ -d "$MUSIC_DIR" ]; then
 
 
     # Deleting songs that aren't on the YouTube playlist anymore
-    echo -e "\nMusic sync: Scanning for removed songs..."
+    echo -e "\nMusic sync: Checking for removed songs..."
 
     if yt-dlp --get-id --flat-playlist --no-warnings "$PLAYLIST_URL" > Geniusnt/online_ids.txt; then
 
