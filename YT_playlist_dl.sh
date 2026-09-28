@@ -115,7 +115,6 @@ if [ -d "$MUSIC_DIR" ]; then
     --embed-thumbnail \
     --ppa "EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf crop='ih:ih'" \
     --embed-metadata \
-    --convert-subs lrc \
     --postprocessor-args "ffmpeg:-id3v2_version 3" \
     --parse-metadata "track_number:%(meta_track)s" \
     --parse-metadata "::(?P<uploader>)" \
