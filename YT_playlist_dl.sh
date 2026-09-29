@@ -6,7 +6,7 @@
 # Set music directory, YT playlist link, and a playlist name for all your songs here
 PLAYLIST_URL="<Your YouTube playlist's link (make sure the playlist is set to public)>"
 PLAYLIST_FILE="<What you want your playlist to be called on your device>.m3u"
-MUSIC_DIR=".."
+MUSIC_DIR="</path/to/your/music/folder/ (make sure that last / is there)>"
 # You'r all set to use the script now :D
 
 #makes the script run in the folder it's saved in rather than your terminals active directory
