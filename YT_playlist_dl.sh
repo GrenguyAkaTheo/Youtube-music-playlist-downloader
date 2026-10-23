@@ -116,6 +116,7 @@ if [ -d "$MUSIC_DIR" ]; then
 
     # The actuall download command
     # Feel free to change the metadata related taggs so that its suited for you (If it breaks shit you can always just look at the original command on GitHub again) :D
+    # If you want to use cookies from your installed browser you can replace the first argument in this command with `--cookies-from-browser <your web browser> \`
     yt-dlp \
     --cookies $SCRIPT_DIR/cookies.txt \
     --extractor-args "youtube:player_client=tv_downgraded,default" \
