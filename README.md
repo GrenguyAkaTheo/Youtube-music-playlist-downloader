@@ -33,6 +33,8 @@ All the mp3 files in your music folder will be added to the playlist of all song
 # Useful info and help
 If you have nix installed but don't want to use a nix shell for this, remove or comment out lines 18 to 32
 
+The version of yt-dlp that avalable on apt is *really* out of date (The latest version on there is 2024.x.x), so this is very unlikely to work if you install yt-dlp via apt.
+
 If your on Windows, this may not work as you need bash suppourt. If you get bash suppourt on Windows then feel free to try it out. I do know that Visual Studio Code has a Shell extention called "Code runner". This should allow the script to run, but you will need to find a way to install the dependancys and get the /bin/bash path to exist
 
 If a song fails to download due to something along the lines of "video unavalale" but you can get the song in some other way, simply rename the song file to the exact title of the song on youtube music. To stop the script from erroring enter add `<The songs youtube ID (will look something like this "otS3u8227kY")>|<The songs filename with the file type>` as a new line anywhere in "id_filename_map.txt". This ID can be found in the songs link (like this, at the quoted location after "watch?v=" https://music.youtube.com/watch?v=`vbMh38KGZMM`&si=_H1xcMw3Cezj9QWS).
