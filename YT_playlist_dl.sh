@@ -119,8 +119,9 @@ if [ -d "$MUSIC_DIR" ]; then
     # If you want to use cookies from your installed browser you can replace the first argument in this command with `--cookies-from-browser <your web browser> \`
     yt-dlp \
     --cookies $SCRIPT_DIR/cookies.txt \
-    --extractor-args "youtube:player_client=tv_downgraded,default" \
-    -f "ba/b" \
+    --extractor-args "youtube:player_client=default,web_embedded" \
+    --remote-components ejs:github \
+    -f "bestaudio/best" \
     -x --audio-format mp3 \
     --audio-quality 0 \
     --embed-thumbnail \
